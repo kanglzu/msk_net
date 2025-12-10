@@ -1,4 +1,4 @@
-﻿# MSK-Net: Multi-Scale Spatial KANs Enhanced U-Shaped Network
+﻿# MSK-Net: Multi-Scale Spatial KANs Enhanced U-Shaped Network For Explainable 3D Brain Tumor Segmentation
 
 Official PyTorch implementation of **MSK-Net** for explainable 3D brain tumor segmentation.
 
@@ -143,3 +143,4 @@ This project is licensed under the MIT License.
 - KAN implementations from [xKAN](https://github.com/mlsquare/xKAN)
 - BraTS challenge organizers
 - Funded by: Talent Scientific Fund of Lanzhou University (Grant 561120212)
+

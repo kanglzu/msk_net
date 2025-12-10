@@ -1,0 +1,302 @@
+# MSK-Net Configuration Template
+# Fill in the values according to your experimental setup
+
+# ============================================================================
+# Model Architecture Configuration
+# ============================================================================
+model:
+  name: "MSK-Net"
+  n_channels: <int>           # Number of input modalities
+  n_classes: <int>            # Number of output classes
+  input_size: [<int>, <int>, <int>]  # Spatial dimensions [D, H, W]
+  
+  features: [<int>, <int>, <int>, <int>, <int>]  # Feature channels per level
+  
+  # Spatial KAN Block (SKB) Configuration
+  skb:
+    enabled: <bool>
+    patch_size: [<int>, <int>, <int>]
+    num_layers: <int>
+    target_token_embed_dims: [<int>, <int>, <int>]
+    spline_orders: [<int>, <int>, <int>]
+    grid_sizes: [<int>, <int>, <int>]
+    num_atoms: <int>
+    use_se: <bool>
+    se_reduction: <int>
+    spatial_block_size: <int>
+  
+  # KAN-Boosted Attention Module (KBAM) Configuration
+  kbam:
+    enabled: <bool>
+    grid_size: <int>
+    spline_order: <int>
+    reduction: <int>
+    use_max_pool: <bool>
+  
+  # Cross-Scale Gating Module (CSGM) Configuration
+  csgm:
+    enabled: <bool>
+    grid_size: <int>
+    spline_order: <int>
+  
+  # Atrous Spatial Pyramid Pooling (ASPP) Configuration
+  aspp:
+    enabled: <bool>
+    num_modules: <int>
+    dilation_rates: [<int>, <int>, <int>, <int>]
+    out_channels: <int>
+  
+  # Deep Supervision Configuration
+  deep_supervision:
+    enabled: <bool>
+    num_aux_heads: <int>
+    weights: [<float>, <float>, <float>]
+
+# ============================================================================
+# KAN Configuration
+# ============================================================================
+kan:
+  type: <str>  # Options: bspline, fourier, chebyshev, hermite, gegenbauer, jacobi, bessel, lucas, fibonacci, grbf, wavelet
+  
+  bspline:
+    grid_range: [<float>, <float>]
+    enable_standalone_scale_spline: <bool>
+    scale_noise: <float>
+    scale_base: <float>
+    scale_spline: <float>
+    base_activation: <str>
+    grid_eps: <float>
+    init_method: <str>
+    init_gain: <float>
+  
+  fourier:
+    grid_range: [<float>, <float>]
+    
+  chebyshev:
+    grid_range: [<float>, <float>]
+    
+  gegenbauer:
+    alpha: <float>
+    grid_range: [<float>, <float>]
+    
+  jacobi:
+    alpha: <float>
+    beta: <float>
+    grid_range: [<float>, <float>]
+    
+  grbf:
+    grid_range: [<float>, <float>]
+
+# ============================================================================
+# Training Configuration
+# ============================================================================
+training:
+  epochs: <int>
+  batch_size: <int>
+  num_workers: <int>
+  
+  early_stopping:
+    enabled: <bool>
+    patience: <int>
+    monitor: <str>
+    mode: <str>
+  
+  optimizer:
+    type: <str>
+    lr: <float>
+    betas: [<float>, <float>]
+    weight_decay: <float>
+    eps: <float>
+  
+  scheduler:
+    type: <str>
+    T_max: <int>
+    eta_min: <float>
+    warmup_epochs: <int>
+    warmup_start_lr: <float>
+  
+  grad_clip:
+    enabled: <bool>
+    max_norm: <float>
+  
+  amp:
+    enabled: <bool>
+  
+  loss:
+    type: <str>  # Options: dice_bce, topo_focal, hybrid_dice_topo
+    
+    dice_bce:
+      dice_weight: <float>
+      bce_weight: <float>
+      smooth: <float>
+      class_weights: <list or null>
+    
+    topo_focal:
+      alpha: <float>
+      gamma: <float>
+      lambda_t: <float>
+      class_weights: <list or null>
+    
+    hybrid:
+      dice_bce_weight: <float>
+      topo_focal_weight: <float>
+  
+  checkpoint:
+    save_freq: <int>
+    save_best_only: <bool>
+    monitor: <str>
+    mode: <str>
+
+# ============================================================================
+# Data Configuration
+# ============================================================================
+data:
+  train_data_dir: <path>
+  val_data_dir: <path>
+  test_data_dir: <path>
+  
+  train_cache_dir: <path>
+  val_cache_dir: <path>
+  test_cache_dir: <path>
+  
+  dataset: <str>  # Options: brats2018, brats2021, brats_gli
+  modalities: [<str>, <str>, <str>, <str>]
+  num_classes: <int>
+  class_names: [<str>, <str>, <str>]
+  
+  split:
+    method: <str>
+    train_ratio: <float>
+    val_ratio: <float>
+    test_ratio: <float>
+    k_folds: <int>
+    random_seed: <int>
+  
+  preprocessing:
+    normalization:
+      method: <str>
+      clip_range: [<float>, <float>]
+    crop_to_nonzero: <bool>
+    target_size: [<int>, <int>, <int>]
+    interpolation: <str>
+    patch_sampling:
+      enabled: <bool>
+      patch_size: [<int>, <int>, <int>]
+      samples_per_volume: <int>
+      foreground_probability: <float>
+  
+  augmentation:
+    enabled: <bool>
+    random_affine:
+      scales: [<float>, <float>]
+      degrees: <int>
+      translation: <int>
+      p: <float>
+    elastic_deformation:
+      num_control_points: <int>
+      max_displacement: <float>
+      locked_borders: <int>
+      p: <float>
+    random_flip:
+      axes: [<int>, <int>, <int>]
+      p: <float>
+    random_gamma:
+      log_gamma: [<float>, <float>]
+      p: <float>
+    random_noise:
+      mean: <float>
+      std: [<float>, <float>]
+      p: <float>
+
+# ============================================================================
+# Inference Configuration
+# ============================================================================
+inference:
+  batch_size: <int>
+  
+  tta:
+    enabled: <bool>
+    flip_axes: [[<int>], [<int>], [<int>], [<int>, <int>], [<int>, <int>], [<int>, <int>], [<int>, <int>, <int>]]
+  
+  post_processing:
+    remove_small_objects: <bool>
+    min_size: <int>
+    
+  metrics:
+    - <str>
+    - <str>
+    - <str>
+
+# ============================================================================
+# Explainability Configuration
+# ============================================================================
+explainability:
+  methods: [<str>, <str>, <str>]
+  
+  score_cam:
+    batch_size: <int>
+    target_layer: <str>
+  
+  eval_metrics:
+    - <str>
+    - <str>
+    - <str>
+
+# ============================================================================
+# Experiment Configuration
+# ============================================================================
+experiments:
+  ablation:
+    components:
+      - name: <str>
+        skb: <bool>
+        kbam: <bool>
+        csgm: <bool>
+        aspp: <int>
+    
+    kan_basis:
+      - <str>
+    
+    embedding_dims:
+      - [<int>, <int>, <int>]
+    
+    skb_layers: [<int>]
+    aspp_nums: [<int>]
+    use_se: [<bool>]
+    deep_supervision: [<bool>]
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+logging:
+  log_dir: <path>
+  exp_name: <str>
+  log_interval: <int>
+  save_predictions: <bool>
+  save_visualizations: <bool>
+  
+  wandb:
+    enabled: <bool>
+    project: <str>
+    entity: <str or null>
+
+# ============================================================================
+# Hardware Configuration
+# ============================================================================
+hardware:
+  device: <str>
+  gpu_ids: [<int>]
+  num_gpus: <int>
+  seed: <int>
+  deterministic: <bool>
+  benchmark: <bool>
+
+# ============================================================================
+# Paths
+# ============================================================================
+paths:
+  output_dir: <path>
+  checkpoint_dir: <path>
+  log_dir: <path>
+  cache_dir: <path>
+

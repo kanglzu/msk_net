@@ -1,14 +1,8 @@
-﻿# MSK-Net: Multi-Scale Spatial KANs Enhanced U-Shaped Network For Explainable 3D Brain Tumor Segmentation
+# MSK-Net: Multi-Scale Spatial KANs Enhanced U-Shaped Network For Explainable 3D Brain Tumor Segmentation
 
 Official PyTorch implementation of **MSK-Net** for explainable 3D brain tumor segmentation.
 
 ![MSK-Net Framework](vis/framework.png)
-
-**Paper**: MSK-Net: Multi-Scale Spatial KANs Enhanced U-Shaped Network For Explainable 3D Brain Tumor Segmentation
-
-**Authors**: Yutong Wang, Zhongfeng Kang, et al.
-
-**Affiliation**: Lanzhou University, China
 
 ---
 
@@ -31,13 +25,13 @@ MSK-Net is a novel 3D segmentation framework that integrates **Kolmogorov-Arnold
 
 - Python >= 3.8
 - PyTorch >= 2.1.0
-- CUDA >= 12.2
+- CUDA >= 12.x
 
 ### Setup
 
 ```bash
 # Clone repository
-git clone https://github.com/kanglzu/msk_net.git
+git clone https://github.com/msk-net/msk_net.git
 cd msk_net
 
 # Create virtual environment
@@ -46,9 +40,6 @@ conda activate msk_net
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Install xKAN library
-git clone https://github.com/mlsquare/xKAN.git
 ```
 
 ---
@@ -57,18 +48,16 @@ git clone https://github.com/mlsquare/xKAN.git
 
 ### 1. Prepare Data
 
-Download BraTS datasets
-Organize data structure:
+Download BraTS datasets and organize data structure:
 ```
-/path/to/BraTS2021/
+/path/to/dataset/
 ├── train/
-│   ├── BraTS2021_00001/
-│   │   ├── BraTS2021_00001_t1.nii.gz
-│   │   ├── BraTS2021_00001_t1ce.nii.gz
-│   │   ├── BraTS2021_00001_t2.nii.gz
-│   │   ├── BraTS2021_00001_flair.nii.gz
-│   │   └── BraTS2021_00001_seg.nii.gz
-│   ├── BraTS2021_00002/
+│   ├── patient_001/
+│   │   ├── *_t1.nii.gz
+│   │   ├── *_t1ce.nii.gz
+│   │   ├── *_t2.nii.gz
+│   │   ├── *_flair.nii.gz
+│   │   └── *_seg.nii.gz
 │   └── ...
 └── test/
     └── ...
@@ -76,32 +65,28 @@ Organize data structure:
 
 ### 2. Configure Experiment
 
-Edit configuration file `configs/base_config.yaml` or create a new one.
+Copy the template configuration file and fill in your parameters:
 
 ```bash
-# Example update in configs/base_config.yaml
-data:
-  train_data_dir: "/path/to/BraTS2021/train"
-  test_data_dir: "/path/to/BraTS2021/test"
+cp configs/config_template.yaml configs/my_config.yaml
+# Edit configs/my_config.yaml with your settings
 ```
 
 ### 3. Train Model
 
 ```bash
-# Train with default configuration
-python msk_net/train.py --config msk_net/configs/base_config.yaml
+python train.py --config configs/my_config.yaml
 
 # Resume from checkpoint
-python msk_net/train.py --config msk_net/configs/base_config.yaml --resume output/checkpoints/latest.pth
+python train.py --config configs/my_config.yaml --resume checkpoints/latest.pth
 ```
 
 ### 4. Test Model
 
 ```bash
-# Test with best checkpoint
-python msk_net/inference.py \
-    --config msk_net/configs/base_config.yaml \
-    --checkpoint output/checkpoints/best.pth \
+python inference.py \
+    --config configs/my_config.yaml \
+    --checkpoint checkpoints/best.pth \
     --tta
 ```
 
@@ -111,24 +96,48 @@ python msk_net/inference.py \
 
 ```
 msk_net/
+├── configs/
+│   ├── config_template.yaml      # Configuration template
+│   └── ...
 ├── models/
 │   ├── blocks/
-│   │   ├── skb.py                 # Spatial KAN Block
-│   │   ├── kbam.py                # KAN-Boosted Attention Module
-│   │   ├── csgm.py                # Cross-Scale Gating Module
-│   │   ├── aspp.py                # Atrous Spatial Pyramid Pooling
-│   │   └── common.py              # Common layers
-│   └── msk_net.py                 # Main architecture
+│   │   ├── skb.py                # Spatial KAN Block
+│   │   ├── kbam.py               # KAN-Boosted Attention Module
+│   │   ├── csgm.py               # Cross-Scale Gating Module
+│   │   ├── aspp.py               # Atrous Spatial Pyramid Pooling
+│   │   └── common.py             # Common layers
+│   └── msk_net.py                # Main architecture
 ├── datasets/
-│   └── brats_dataset.py           # Data loading and preprocessing
+│   └── brats_dataset.py          # Data loading and preprocessing
 ├── losses/
-│   └── losses.py                  # Loss functions
-├── train.py                       # Training script
-├── inference.py                   # Inference and testing
-└── README.md                      # This file
+│   ├── losses.py                 # Loss functions
+│   └── metrics.py                # Evaluation metrics
+├── explainability/
+│   ├── score_cam.py              # Score-CAM implementation
+│   ├── grad_cam.py               # Grad-CAM implementation
+│   └── full_grad.py              # FullGrad implementation
+├── train.py                      # Training script
+├── inference.py                  # Inference and testing
+└── README.md
 ```
 
+---
 
+## Supported KAN Basis Functions
+
+MSK-Net supports multiple KAN basis function implementations:
+
+- B-Spline (default)
+- Fourier
+- Chebyshev
+- Hermite
+- Gegenbauer
+- Jacobi
+- Bessel
+- Lucas
+- Fibonacci
+- Gaussian RBF
+- Wavelet
 
 ---
 
@@ -142,5 +151,3 @@ This project is licensed under the MIT License.
 
 - KAN implementations from [xKAN](https://github.com/mlsquare/xKAN)
 - BraTS challenge organizers
-- Funded by: Talent Scientific Fund of Lanzhou University (Grant 561120212)
-
